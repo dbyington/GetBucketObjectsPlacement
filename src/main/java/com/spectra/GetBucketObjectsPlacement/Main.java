@@ -20,32 +20,23 @@ public class Main {
         final Ds3ClientHelpers clientHelpers = Ds3ClientHelpers.wrap(ds3Client);
 
         clientHelpers.ensureBucketExists(args[0]);
-        System.out.println("Getting black pearl file list");
-        final Iterable<Contents> bpfilelist = clientHelpers.listObjects(args[0]);
-        final Iterable<Ds3Object> bpDs3Objects = clientHelpers.toDs3Iterable(bpfilelist);
-
-        System.out.println(bpDs3Objects.toString().length());
-        final List<Ds3Object> objectList = Lists.newArrayList(bpDs3Objects);
 
         final GetBucketSpectraS3Response myBucket = ds3Client.getBucketSpectraS3(new GetBucketSpectraS3Request(args[0]));
         System.out.printf("Bucket name: %s\tBucket UUID: %s\n", myBucket.getBucketResult().getName(),myBucket.getBucketResult().getId());
-        System.out.printf("Getting %f objects\n", bpDs3Objects.toString().length());
+
+        final GetObjectsWithFullDetailsSpectraS3Request detailedListRequest = new GetObjectsWithFullDetailsSpectraS3Request();
+        detailedListRequest.withBucketId(args[0]);
+        detailedListRequest.withIncludePhysicalPlacement(true);
+
+        final GetObjectsWithFullDetailsSpectraS3Response detailedList = ds3Client.getObjectsWithFullDetailsSpectraS3(detailedListRequest);
 
 
-        final GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Response phyicalPlacementResponse = ds3Client.getPhysicalPlacementForObjectsWithFullDetailsSpectraS3(new GetPhysicalPlacementForObjectsWithFullDetailsSpectraS3Request(args[0], objectList));
-
-        for (BulkObject obj : phyicalPlacementResponse.getBulkObjectListResult().getObjects()) {
-            System.out.printf("Object: %s\tUUID: %s\tTapes:", obj.getName(), obj.getId());
-
-            for (Tape tape : obj.getPhysicalPlacement().getTapes()) {
-                System.out.printf(" %s",tape.getBarCode());
-            }
-            System.out.printf("\n");
+        for (DetailedS3Object detailedS3Object : detailedList.getDetailedS3ObjectListResult().getDetailedS3Objects()) {
+            System.out.printf("Object: %-60s Tape: %-8s\n", detailedS3Object.getName(), detailedS3Object.getBlobs().getObjects().get(0).getPhysicalPlacement().getTapes().get(0).getBarCode());
         }
+
+
         System.out.println("done");
-
-
-
 
     }
 
