@@ -1,6 +1,7 @@
 package com.spectra.GetBucketObjectsPlacement;
 
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Booleans;
 import com.spectralogic.ds3client.Ds3Client;
 import com.spectralogic.ds3client.Ds3ClientBuilder;
 import com.spectralogic.ds3client.commands.spectrads3.*;
@@ -32,7 +33,7 @@ public class Main {
 
 
         for (DetailedS3Object detailedS3Object : detailedList.getDetailedS3ObjectListResult().getDetailedS3Objects()) {
-            System.out.printf("Object: %-60s Tape: %-8s\n", detailedS3Object.getName(), detailedS3Object.getBlobs().getObjects().get(0).getPhysicalPlacement().getTapes().get(0).getBarCode());
+            System.out.printf("Object: %-50s Created: %-30s Tape: %-8s In Cache: %s\n", detailedS3Object.getName(), detailedS3Object.getCreationDate(), detailedS3Object.getBlobs().getObjects().get(0).getPhysicalPlacement().getTapes().get(0).getBarCode(), detailedS3Object.getBlobsInCache());
         }
 
 
